@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Heptangle Lab</title>
+
+  <!-- Tomorrow font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root{
+      --bg:#FFFFF8;
+      --fg:#111;
+      --border:#111;
+      --nav-h:64px; /* set precisely at runtime */
+      --accent:#c53b2f;
+      --radius:10px;
+    }
+
+    html,body{margin:0;background:var(--bg);color:var(--fg);font-family:'Tomorrow',sans-serif}
+    *{font-family:'Tomorrow',sans-serif}
+
+    /* minimalist post list */
+/* compact completed-projects list */
+.cp-wrap { max-width: 1200px; margin: 0 auto; }
+.cp-topline { height: 1px; background: rgba(0,0,0,.28); margin: 10px 0 6px; }
+
+.cp-list { display: block; }
+.cp-row { 
+  display: grid; 
+  grid-template-columns: auto 1fr auto; 
+  align-items: center; 
+  gap: 1rem; 
+  padding: 18px 0;           /* more wedge space */
+  border-top: 1px solid rgba(0,0,0,.18);
+}
+.cp-list .cp-row:first-child { border-top: 0; }
+
+.cp-tag {
+  font-size: .82rem;
+  line-height: 1;
+  padding: .28rem .62rem;
+  border: 1px solid rgba(0,0,0,.8);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.cp-title {
+  margin: 0;
+  font-weight: 500;          /* smaller, not bold-heavy */
+  font-size: clamp(1.02rem, 1.8vw, 1.35rem);
+}
+
+.cp-date {
+  font-size: .92rem;
+  opacity: .8;
+  white-space: nowrap;
+}
+
+/* neutralise link colours and hover effects */
+.cp-row,
+.cp-row:visited,
+.cp-row:hover,
+.cp-row:active {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* responsive: stack date under title on small screens */
+@media (max-width: 720px){
+  .cp-row { grid-template-columns: 1fr; gap: .4rem; }
+  .cp-date { order: 3; }
+}
+
+
+
+    /* fixed top nav */
+    header.topnav{
+      position:fixed; top:0; left:0; right:0;
+      display:flex; justify-content:flex-end; align-items:center; gap:1.5rem;
+      padding:0.6rem 5vw; background:var(--bg); z-index:1000;
+      border-bottom:1px solid rgba(0,0,0,.06);
+    }
+    .nav-link{position:relative;text-decoration:none;color:var(--fg);font-size:1rem;padding:.2rem .1rem}
+    .nav-link::after{content:"";position:absolute;left:0;bottom:-2px;height:2px;width:0;background:var(--fg);transition:width .18s ease}
+    .nav-link:hover::after{width:100%}
+    .nav-pill{border:1.8px solid var(--border);border-radius:var(--radius);padding:.45rem .95rem;color:var(--fg);text-decoration:none}
+    .nav-pill:hover{background:var(--fg);color:var(--bg)}
+
+    /* research hover menu — compact */
+    .nav-dropdown{position:relative}
+    .research-menu{position:absolute;top:calc(100% + 6px);right:0;background:#fff;color:var(--fg);
+      border:2px solid var(--border);border-radius:10px;padding:6px 8px;min-width:240px;max-width:300px;
+      box-shadow:0 6px 14px rgba(0,0,0,.08);opacity:0;transform:translateY(-6px);
+      transition:opacity .16s ease,transform .18s ease;pointer-events:none;z-index:1200}
+    .nav-dropdown:hover .research-menu{opacity:1;transform:translateY(0);pointer-events:auto}
+    .research-menu .menu-item{display:block;padding:6px 8px;text-decoration:none;color:var(--fg);font-size:1rem;line-height:1.15;border-radius:6px}
+    .research-menu .menu-item:hover{text-decoration:underline}
+    .research-menu .menu-item.pinpoint{background:#c53b2f;color:#fff;font-weight:700;border-radius:8px;margin:0 0 6px}
+
+    /* landing body padded below fixed nav */
+    body{padding:calc(var(--nav-h) + 2rem) 5vw 4rem}
+
+    main{max-width:760px}
+    h1{font-size:clamp(2.5rem,6vw,4rem);font-weight:400;margin:0 0 1.25rem}
+
+    p{margin:0 0 .8rem;line-height:1.7;font-size:1.1rem}
+    .buttons{margin-top:2rem;display:flex;gap:1.2rem;flex-wrap:wrap}
+    .btn{border:1.8px solid var(--border);border-radius:var(--radius);padding:.7rem 1.2rem;text-decoration:none;color:var(--fg)}
+
+    /* overlay panel */
+    .panel{
+      position:fixed; inset:0; background:var(--bg);
+      transform:translateX(-100%); transition:transform 420ms ease;
+      padding:calc(var(--nav-h) + 2rem) 5vw 4rem; overflow:auto; z-index:500;
+    }
+    .panel.open{transform:translateX(0)}
+
+    .who-container{max-width:1400px;margin:0 auto}
+    .who-container h1{font-size:clamp(2.8rem,6.5vw,4.5rem);font-weight:400;margin:0 0 1.5rem}
+
+    /* layout: left scroll column */
+    .who-grid{display:block;position:relative}
+    .years{max-width:60ch}
+    .year-intro{margin-bottom:8vh}
+    .year-section{min-height:90vh;padding:1rem 0 12vh}
+
+    /* right pane fixed to viewport */
+    .visual-pane{
+      position:fixed; right:0; top:var(--nav-h); bottom:0; width:50vw;
+      display:none; flex-direction:column; align-items:center; justify-content:center;
+      pointer-events:none; z-index:900;
+    }
+    body.show-visual .visual-pane{display:flex}
+    .visual-pane .hint{color:#8a8a8a;font-weight:700;font-size:.95rem;margin-bottom:.6rem;text-align:center}
+
+    /* odometer wheels: four identical columns */
+    .visual-pane .odometer{display:inline-flex;align-items:baseline;gap:.05ch;letter-spacing:0;
+      font-variant-numeric:tabular-nums lining-nums;line-height:1;
+      font-family:'Tomorrow',ui-monospace,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;
+      font-size:clamp(4rem,12vw,9rem);
+    }
+    .odometer .wheel{display:inline-block;width:1ch;height:1em;overflow:hidden;position:relative}
+    .odometer .digit-strip{display:block;will-change:transform}
+    .odometer .digit-strip span{display:block;height:1em;line-height:1em;width:1ch;text-align:center}
+
+    /* back button pinned bottom-left */
+    .back-btn{position:fixed;left:1.25rem;bottom:1.25rem;background:transparent;border:0;font-size:2rem;font-weight:800;line-height:1;cursor:pointer;color:var(--fg);z-index:1100;display:none}
+    body.show-panel #who-back{display:block}
+
+    /* headings */
+    .project-title{font-weight:300;font-size:clamp(1.4rem,2.6vw,2rem);margin:0 0 .35rem}
+    .location-title{font-weight:800;color:var(--accent);font-size:clamp(1.1rem,2vw,1.35rem);margin:0 0 1rem}
+    .twh.typing::before{content:"|";margin-right:.4ch;animation:blink 1s steps(1,end) infinite}
+    @keyframes blink{50%{opacity:0}}
+
+    /* knowme page */
+    .know-container{max-width:1100px;margin:0 auto}
+    .know-container h1{font-size:clamp(2.4rem,6vw,3.6rem);font-weight:400;margin:0 0 1.25rem}
+    .know-intro{max-width:60ch;margin-bottom:2rem;font-size:1.1rem;line-height:1.7}
+    .bizcard{background:#fff;border:2px solid var(--border);border-radius:16px;padding:2rem;display:grid;grid-template-columns:1.6fr 240px;gap:1.6rem;align-items:center}
+    .card-left .name{color:var(--accent);font-weight:800;font-size:clamp(1.3rem,2.4vw,1.8rem);margin:0 0 .25rem}
+    .card-left .role{color:#b04a41;font-weight:600;margin:0 0 .8rem}
+    .card-left .inst{color:#666;margin:.15rem 0}
+    .card-right .qr-box{width:220px;height:220px;border:1.6px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;background:#fff}
+    .card-right .small{font-size:.9rem;margin-top:.6rem}
+    .vcard-actions{margin-top:1rem;font-size:.95rem}
+    .vcard-actions .link{color:var(--fg);text-decoration:underline}
+
+    @media (max-width: 900px){ .visual-pane{width:48vw} }
+    @media (max-width: 700px){ .visual-pane{position:static;width:auto;margin-top:2rem;pointer-events:auto} }
+
+    /* how-do-i-research panel */
+    .how-container{max-width:1300px;margin:0 auto}
+    .how-container h1{font-size:clamp(2.6rem,6vw,4rem);font-weight:400;margin:0 0 1rem}
+    .how-intro{max-width:70ch;margin:0 0 1.25rem;font-size:1.1rem;line-height:1.7}
+    .res-intro{max-width:70ch;margin:0 0 1.25rem;font-size:1.1rem;line-height:1.7}
+    .illus-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.2rem;margin-top:1.2rem}
+    .illus-card{position:relative;background:#fff;border:2px solid var(--border);border-radius:16px;padding:1.25rem;min-height:420px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .illus-card img,.illus-card svg{max-width:100%;height:auto;display:block;transition:opacity .28s ease}
+    .illus-card:hover img,.illus-card:hover svg{opacity:1} 
+    .illus-card .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:1.4rem;opacity:0;z-index:2;background:rgba(0,0,0,0);transition:opacity .28s ease, background .28s ease, color .18s ease}
+    .illus-card .overlay p{color:#fff;font-size:1.05rem;line-height:1.6;max-width:55ch;margin:0}
+    .illus-card.forecast-card:hover{background:#2A623D}
+    .illus-card.foresight-card:hover{background:#AF1732}
+    .illus-card:hover .overlay{opacity:0} 
+    .illus-caption{display:flex;justify-content:center;margin-top:.8rem}
+    .pill{border:1.8px solid var(--border);border-radius:12px;padding:.35rem .85rem;font-size:1.05rem}
+    @media (max-width: 980px){ .illus-grid{grid-template-columns:1fr} .illus-card{min-height:360px} }
+
+    /* research panel */
+    .research-container{max-width:1200px;margin:0 auto}
+    .research-container h1{font-size:clamp(2.2rem,5.5vw,3.2rem);font-weight:400;margin:0 0 .75rem}
+    .research-tabs{display:none}
+    .rtab{border:1.8px solid var(--border);border-radius:10px;padding:.45rem .8rem;font-size:.95rem;cursor:pointer;background:#fff}
+    .rtab:hover{background:rgba(0,0,0,.05)}
+    .res-divider{height:1px;background:rgba(0,0,0,.2);margin:.6rem 0 1.2rem}
+    .res-box-row{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin:0 0 1.2rem}
+    .res-box{background:#F0EEE6;border:2px solid var(--border);border-radius:12px;padding:1rem 1.1rem}
+    .res-box.alt{background:#D1CFC5}
+    .res-box p{margin:0;font-size:1.02rem;line-height:1.7}
+    .quiet-link{color:inherit;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+    .section-title{margin:1.2rem 0 .8rem;text-align:center;font-weight:700;font-size:clamp(1.3rem,2.6vw,1.8rem)}
+    .hr{height:1px;background:rgba(0,0,0,.35);border:none;margin:.2rem auto 1.2rem;max-width:680px}
+    .years-col{position:relative}
+    .list{display:flex;flex-direction:column;gap:1.2rem}
+    .year-block{display:grid;grid-template-columns:76px 1fr;gap:.8rem}
+    .year-label{font-weight:700;opacity:.85}
+    .entry{display:flex;flex-direction:column;gap:.6rem}
+    .entry-card{background:#fff;border:2px solid var(--border);border-radius:12px;padding:.75rem .9rem}
+/* lighter + smaller subject line */
+.cp-title{
+  font-weight:400;
+  font-size:clamp(1.00rem, 1.25vw, 1.12rem);
+  margin:0;
+}
+    .entry-auth{font-size:.75rem;opacity:.75;margin:0 0 .4rem}
+    .tagbar{display:flex;gap:.35rem;flex-wrap:wrap}
+    .tag{border:1.4px solid var(--border);border-radius:999px;padding:.15rem .5rem;font-size:.72rem}
+    .tag.orange{background:#f59c4a;border-color:#f59c4a;color:#fff;cursor:pointer}
+    .tag.orange.clicked{background:#D97757;border-color:#D97757}
+    .abstract{background:#fff;border:2px solid #4f8df7;border-radius:12px;padding:1rem;min-height:100px}
+    .research-tiles{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:190px;gap:1.5rem;margin:0 0 1.2rem}
+    .research-tiles .tile{background:#E9E5DB;border:none;border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform .18s ease, box-shadow .18s ease;cursor:pointer}
+    .research-tiles .tile.tall{grid-row:span 2}
+    .research-tiles .tile img,.research-tiles .tile svg{max-width:84%;max-height:84%;object-fit:contain;display:block}
+    .research-tiles .tile:hover{transform:scale(1.015);box-shadow:0 6px 16px rgba(0,0,0,.10)}
+    #tile-align{background:#E3DACC}
+    #tile-pinpoint{background:#F0EEE6}
+    #tile-disc{background:#D1CFC5}
+    @media (max-width:880px){.research-tiles{grid-template-columns:1fr;grid-auto-rows:220px}.research-tiles .tile.tall{grid-row:auto}}
+    @media (max-width: 720px){ .year-block{grid-template-columns:58px 1fr} .res-box-row{grid-template-columns:1fr} }
+  
+  
+  .illus-card img,.illus-card svg{max-width:100%;height:auto;display:block}
+    .illus-card .overlay{display:none}
+    .atlas-divider{margin:2rem auto 2.5rem;text-align:center;position:relative}
+    .atlas-divider::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.25)}
+    .atlas-divider span{position:relative;padding:.2rem .8rem;background:var(--bg);font-weight:700}
+    .heptad-wrap{display:grid;grid-template-columns:1.2fr 1fr;gap:2.2rem;align-items:start;margin-top:1.5rem}
+    .heptad-left{max-width:60ch}
+    .hep-sec{min-height:70vh;padding:1rem 0}
+    .hep-title{font-weight:600;font-size:clamp(1.3rem,2.2vw,1.8rem);margin:0 0 .5rem}
+    .hep-body{margin:0;line-height:1.7}
+    .heptad-right{position:relative;align-self:stretch;min-height:100%;}
+    .heptad-visual{position:sticky;top:calc(var(--nav-h) + 2rem);width:min(46vw,460px);height:min(46vw,460px);margin:0 auto;border-radius:16px;display:grid;place-items:center;transition:transform .8s ease;will-change:transform}
+    .h-layer{position:absolute;inset:0;margin:auto;width:100%;height:100%;background:none;background-image:url('singleangle.svg');background-repeat:no-repeat;background-position:center;background-size:contain;opacity:0;transform:rotate(0deg);transition:opacity .6s ease, transform .8s ease;pointer-events:none}
+    .h-layer.l1{color:#76A67C;opacity:1}
+    .h-layer.l2{color:#B6A117}
+    .h-layer.l3{color:#C47171}
+    .h-layer.l4{color:#7171C4}
+    .h-layer.l5{color:#77B2AB}
+    .h-layer.l6{color:#919191}
+    .h-layer.l7{color:#B783CA}
+    .heptad-left .hep-sec:nth-of-type(1) .hep-title{color:#76A67C}
+    .heptad-left .hep-sec:nth-of-type(2) .hep-title{color:#B6A117}
+    .heptad-left .hep-sec:nth-of-type(3) .hep-title{color:#C47171}
+    .heptad-left .hep-sec:nth-of-type(4) .hep-title{color:#7171C4}
+    .heptad-left .hep-sec:nth-of-type(5) .hep-title{color:#77B2AB}
+    .heptad-left .hep-sec:nth-of-type(6) .hep-title{color:#919191}
+    .heptad-left .hep-sec:nth-of-type(7) .hep-title{color:#B783CA}
+    </style>
+</head>
+<body>
+  <header class="topnav">
+    <a class="nav-link" href="https://substack.com/@heptangle" target="_blank" rel="noopener">cv</a>
+    <a class="nav-link" href="https://substack.com/@heptangle" target="_blank" rel="noopener">substack</a>
+    <a class="nav-link" href="https://github.com/heptangle" target="_blank" rel="noopener">github</a>
+    <a class="nav-link" href="research.html" id="nav-research">research</a>
+    </div>
+    <a class="nav-pill" href="knowme.html">contact</a>
+  </header>
+
+  <main>
+    <h1>I'm Borna</h1>
+    <p>This is the Heptangle Lab.</p>
+    <p>I engineer ML models in computational political science.</p>
+    <p>Heptangle Lab is my open-science knowledge curation project.</p>
+
+    <div class="buttons">
+      <a class="btn" href="how-do-i-research.html">What is Heptangle?</a>
+      <a class="btn" href="who-am-i.html">Who am I?</a>
+    </div>
+  </main>
+
+  <!-- WHO AM I overlay -->
+  <section id="panel-whoami" class="panel" aria-hidden="true">
+    <div class="who-container">
+      <h1>Who am I?</h1>
+
+      <div class="who-grid">
+        <div class="years" id="years">
+          <!-- your three paragraphs -->
+          <section class="year-intro">
+            <p>I’m Borna. I study how world-building emerges through word-building discourse, the underlying patterns of contemporary political contentions and conflicts, and foresight through scenario building and forecast modelling.</p>
+            <p>At the macro-level, the philosophies of Prof. Braidotti and Prof. Barad on critical posthumanism and planetary futures form the object of my work as a researcher, and at the downstream, I apply their frame of knowledge acquisition to study the causal mechanisms of the post-anthropocene futures. This includes studying discourse in social mobilisation, the language through which politics is constructed and understood, the intra-active networks of agencies that shape political relations.</p>
+            <p>Having worked and studied and lived in seven countries in 20 years; I've come to experience first hand the interconnectivity of the issues and resolutions in our increasingly globalised world; and by choosing to dedicate my telos to the acquisition and sharing of knowledge in Academia, I've taken it as my part in the story of our species to be a small contributor to our anthropic solutions.</p>
+          </section>
+
+          <!-- scrollytelling years: 2026 -> 2019 (headings type; body static) -->
+          <section class="year-section" data-year="2026">
+            <h3 class="project-title twh" data-src="Project"></h3>
+            <div class="location-title twh" data-src="Location"></div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sed justo vitae lacus ultricies dignissim. Integer a sapien sit amet quam gravida dictum.</p>
+            <p>Suspendisse potenti. Praesent consequat, augue vitae luctus iaculis, mi mauris fermentum ipsum, a dictum magna ipsum eget nulla.</p>
+            <p>Ut convallis, nibh eget euismod faucibus, mi risus tristique lorem, sit amet tempor nunc arcu sed justo.</p>
+          </section>
+          <section class="year-section" data-year="2025">
+            <h3 class="project-title twh" data-src="Project"></h3>
+            <div class="location-title twh" data-src="Location"></div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus in cursus elit, at pharetra lorem.</p>
+            <p>Mauris id urna sed nunc hendrerit bibendum. Cras porttitor, nibh a dictum condimentum, arcu leo varius nibh, a tincidunt mi nisl non nisl.</p>
+            <p>Nam quis risus eu justo eleifend cursus. Etiam non nunc quam. Integer ac commodo velit.</p>
+          </section>
+          <section class="year-section" data-year="2024">
+            <h3 class="project-title twh" data-src="Project"></h3>
+            <div class="location-title twh" data-src="Location"></div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id interdum eros.</p>
+            <p>Curabitur vitae vulputate lorem. Pellentesque venenatis, magna eget ultrices ultricies, arcu enim egestas urna, sit amet semper mi neque at lacus.</p>
+            <p>Sed ut tristique magna, a iaculis diam. Vivamus aliquam efficitur velit.</p>
+          </section>
+          <section class="year-section" data-year="2023">
+            <h3 class="project-title twh" data-src="Project"></h3>
+            <div class="location-title twh" data-src="Location"></div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id interdum eros.</p>
+            <p>Curabitur vitae vulputate lorem. Pellentesque venenatis, magna eget ultrices ultricies, arcu enim egestas urna, sit amet semper mi neque at lacus.</p>
+            <p>Sed ut tristique magna, a iaculis diam. Vivamus aliquam efficitur velit.</p>
+            </section>
+          <section class="year-section" data-year="2022">
+            <h3 class="project-title twh" data-src="Project"></h3>
+            <div class="location-title twh" data-src="Location"></div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id interdum eros.</p>
+            <p>Curabitur vitae vulputate lorem. Pellentesque venenatis, magna eget ultrices ultricies, arcu enim egestas urna, sit amet semper mi neque at lacus.</p>
+            <p>Sed ut tristique magna, a iaculis diam. Vivamus aliquam efficitur velit.</p>
+            </section>
+          <section class="year-section" data-year="2021">
+            <h3 class="project-title twh" data-src="Project"></h3>
+            <div class="location-title twh" data-src="Location"></div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id interdum eros.</p>
+            <p>Curabitur vitae vulputate lorem. Pellentesque venenatis, magna eget ultrices ultricies, arcu enim egestas urna, sit amet semper mi neque at lacus.</p>
+            <p>Sed ut tristique magna, a iaculis diam. Vivamus aliquam efficitur velit.</p>
+            </section>
+          <section class="year-section" data-year="2020">
+            <h3 class="project-title twh" data-src="Project"></h3>
+            <div class="location-title twh" data-src="Location"></div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id interdum eros.</p>
+            <p>Curabitur vitae vulputate lorem. Pellentesque venenatis, magna eget ultrices ultricies, arcu enim egestas urna, sit amet semper mi neque at lacus.</p>
+            <p>Sed ut tristique magna, a iaculis diam. Vivamus aliquam efficitur velit.</p>
+            </section>
+          <section class="year-section" data-year="2019">
+            <h3 class="project-title twh" data-src="Project"></h3>
+            <div class="location-title twh" data-src="Location"></div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id interdum eros.</p>
+            <p>Curabitur vitae vulputate lorem. Pellentesque venenatis, magna eget ultrices ultricies, arcu enim egestas urna, sit amet semper mi neque at lacus.</p>
+            <p>Sed ut tristique magna, a iaculis diam. Vivamus aliquam efficitur velit.</p>
+            </section>
+          <section class="year-section" data-year="2018">
+            <h3 class="project-title twh" data-src="Project"></h3>
+            <div class="location-title twh" data-src="Location"></div>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In id interdum eros.</p>
+            <p>Curabitur vitae vulputate lorem. Pellentesque venenatis, magna eget ultrices ultricies, arcu enim egestas urna, sit amet semper mi neque at lacus.</p>
+            <p>Sed ut tristique magna, a iaculis diam. Vivamus aliquam efficitur velit.</p>
+            </section>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW DO I RESEARCH overlay -->
+  <section id="panel-how" class="panel" aria-hidden="true">
+    <div class="how-container">
+      <h1>What is Heptangle?</h1>
+      <p class="how-intro">Heptangle is a heuristics system for producing anticipatory and providential knowledge on political futures through anProvidence applied combination of Foresight and Forecast. Foresight prefiguration inserts partial observers and axioms into a field so that calculation can run ahead of appearance, while forecast empiricism equips inquiry with atlases and rule-sets that standardise measurement and coerce phenomena into calculable form.</p>
+
+      <div class="illus-grid">
+        <div class="illus">
+          <div class="illus-card" aria-label="forecast illustration">
+            <img src="Forecast.svg" alt="forecast diagram" loading="lazy"/>
+          </div>
+          <div class="illus-caption"><span class="pill">forecast</span></div>
+        </div>
+        <div class="illus">
+          <div class="illus-card" aria-label="foresight illustration">
+            <img src="Foresight.svg" alt="foresight diagram" loading="lazy"/>
+          </div>
+          <div class="illus-caption"><span class="pill">foresight</span></div>
+        </div>
+      </div>
+
+      <div class="atlas-divider"><span>Atlas of Providence</span></div>
+
+      <div class="heptad-wrap">
+        <div class="heptad-left">
+          <section class="hep-sec" data-step="1">
+            <h3 class="hep-title">Horizon Construction</h3>
+            <p class="hep-body">The field of inquiry is deliberately constructed rather than discovered. One must establish the observer position, time horizon, and foundational axioms that make the domain intelligible. Rather than simply defining what to study, this stage designs the lens and metric space through which events can emerge. It functions as the deliberate installation of a measurement framework.</p>
+          </section>
+          <section class="hep-sec" data-step="2">
+            <h3 class="hep-title">Frame Calibration</h3>
+            <p class="hep-body">This component standardises the analytical field through shared metrics, indices, spatial grids, and temporal baselines. Frame calibration formalises how a phenomenon become measurable.</p>
+          </section>
+          <section class="hep-sec" data-step="3">
+            <h3 class="hep-title">Axiomatic Projection</h3>
+            <p class="hep-body">Ideal observers and counterfactuals are defined to drive modelled inference. This approach replaces traditional factor identification with the creation of theoretical operators—structural equations, agent classes, or imagined entities—that allow the system to advance beyond currently available evidence.</p>
+          </section>
+          <section class="hep-sec" data-step="4">
+            <h3 class="hep-title">Agential Realism</h3>
+            <p class="hep-body">This stage examines how far each factor can reorganise the model's internal geometry. Variables are treated as existing in superposition—holding multiple potential states simultaneously until observation or intervention collapses them into specific configurations. Techniques such as cross-impact balances and sensitivity analysis are applied to map entangled agencies, where the measurement or activation of one factor instantaneously affects the state space of distant or seemingly unrelated variables. Informed intuition guides the detection of unmodelled couplings and latent mediators that exist in quantum-like indeterminacy before political events force their actualisation.</p>
+          </section>
+          <section class="hep-sec" data-step="5">
+            <h3 class="hep-title">Scenario Composition</h3>
+            <p class="hep-body">Multiple projected states are composed into possible worlds that include breakpoints, reversals, and emergent causal structures. The morphological grid becomes a design space for structural innovation rather than merely sampling consistent outcomes.</p>
+          </section>
+          <section class="hep-sec" data-step="6">
+            <h3 class="hep-title">Apparition Modelling</h3>
+            <p class="hep-body">Each composed scenario is tested for disruptive or untimely events—wild cards, regime shifts, or emergent agencies—that  disrupt sequential causation with simultaneous disruptions. This phase transforms the search for discontinuities into a formal modelling task that evaluates how systems behave under conditions of surprise.</p>
+          </section>
+          <section class="hep-sec" data-step="7">
+            <h3 class="hep-title">Autopoiesis</h3>
+            <p class="hep-body">Iteration is inverse induction. The outcome is an operational model that reshapes decision systems—dashboards, policy simulators, or narrative prototypes—through which new data are continuously absorbed and the horizon recalibrated. Foresight becomes a self-updating methodology that integrates empirical forecast with creative scenario design within a single feedback architecture.</p>
+          </section>
+        </div>
+        <div class="heptad-right">
+          <div class="heptad-visual" aria-hidden="true">
+            <div class="h-layer l1"></div>
+            <div class="h-layer l2"></div>
+            <div class="h-layer l3"></div>
+            <div class="h-layer l4"></div>
+            <div class="h-layer l5"></div>
+            <div class="h-layer l6"></div>
+            <div class="h-layer l7"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESEARCH overlay -->
+  <section id="panel-research" class="panel" aria-hidden="true">
+    <div class="research-container">
+      <h1>Research</h1>
+      <div class="research-tabs">
+        <button class="rtab" data-tab="erc">PINPOINT</button>
+        <button class="rtab" data-tab="align">POLAIGN</button>
+        <button class="rtab" data-tab="discourse">Political Discourse</button>
+      </div>
+      <div class="res-divider"></div>
+      <div class="research-tiles">
+        <a class="tile small" id="tile-align" href="#">
+          <img src="logo_alignment.svg" alt="AI Political Alignment"/>
+        </a>
+        <a class="tile tall" id="tile-pinpoint" href="#">
+          <img src="logo_erc.svg" alt="ERC PINPOINT"/>
+        </a>
+        <a class="tile small" id="tile-disc" href="#">
+          <img src="logo_discourse.svg" alt="Political Discourse"/>
+        </a>
+      </div>
+<div class="hr"></div>
+<div class="section-title">Completed Projects</div>
+<div class="cp-wrap">
+  <div class="cp-topline"></div>
+  <div class="cp-list">
+
+    <a class="cp-row" href="#" target="_blank" rel="noopener">
+      <span class="cp-tag">Under review</span>
+      <h3 class="cp-title">
+        Discursive Strategic Legitimation of Security International Organisations (1975–2024)
+      </h3>
+      <span class="cp-date">2025</span>
+    </a>
+
+    <a class="cp-row" href="https://zenodo.org/records/17332779" target="_blank" rel="noopener">
+      <span class="cp-tag">Term Paper</span>
+      <h3 class="cp-title">
+        Frame Uptake Modalities In Conscription Policy: An Experimental Inquiry into German Attitudes on Military Service
+      </h3>
+      <span class="cp-date">2025</span>
+    </a>
+
+    <a class="cp-row" href="https://zenodo.org/records/17332740" target="_blank" rel="noopener">
+      <span class="cp-tag">Term Paper</span>
+      <h3 class="cp-title">
+        Hollering On the Hill: Illiberal Legitimation Strategies As Crises of Representation in the United States Congress
+      </h3>
+      <span class="cp-date">2025</span>
+    </a>
+
+    <a class="cp-row" href="#" target="_blank" rel="noopener">
+      <span class="cp-tag">Term Paper</span>
+      <h3 class="cp-title">
+        The Specters of Populism: A Hegelian Approach to the Failure of Constitutional Sublation in Populist Phenomenology
+      </h3>
+      <span class="cp-date">2024</span>
+    </a>
+
+    <a class="cp-row" href="https://zenodo.org/records/17296040" target="_blank" rel="noopener">
+      <span class="cp-tag">Thesis</span>
+      <h3 class="cp-title">
+        Discursive Pattern Changes of the Iranian Opposition during the ‘Woman Life Freedom’ protests (2022–2024)
+      </h3>
+      <span class="cp-date">2024</span>
+    </a>
+
+    <a class="cp-row" href="https://zenodo.org/records/17332699" target="_blank" rel="noopener">
+      <span class="cp-tag">Thesis</span>
+      <h3 class="cp-title">
+        Operationalization of Necropolitics in the United States’ migration policies
+      </h3>
+      <span class="cp-date">2022</span>
+    </a>
+
+  </div>
+</div>
+
+  </section>
+
+  <!-- KNOWME overlay -->
+  <section id="panel-knowme" class="panel" aria-hidden="true">
+    <div class="know-container">
+      <h1>Contact</h1>
+      <p class="know-intro">I look forward to meeting anyone who finds this page. If you want to talk research, share ideas, or just say hello, feel free to save my contact and reach out.</p>
+
+      <div class="bizcard">
+        <div class="card-left">
+          <div class="name">M.A. Borna Ardehi</div>
+          <div class="role">Wissenschaftliche Hilfskraft</div>
+          <div class="inst">Geschwister-Scholl-Institut für Politikwissenschaft</div>
+          <div class="inst">Ludwig-Maximilians-Universität München</div>
+          <div class="inst" style="margin-top:.8rem">Office: Maria-Theresia-Straße 21, 81675 München</div>
+          <div class="inst">ardehi.borna@gsi.uni-muenchen.de</div>
+          <div class="vcard-actions">
+            <a id="vcard-download" class="link" href="#">Download vCard</a>
+          </div>
+        </div>
+        <div class="card-right">
+          <div class="qr-box"><canvas id="qrCanvas" width="220" height="220" aria-label="QR code for contact"></canvas></div>
+          <div class="small">Scan to save contact</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- fixed right visual pane and global back button -->
+  <div id="who-visual" class="visual-pane">
+    <div class="hint">roll my timeline</div>
+    <div class="year-display odometer">
+      <span class="wheel w0"><span class="digit-strip"></span></span>
+      <span class="wheel w1"><span class="digit-strip"></span></span>
+      <span class="wheel w2"><span class="digit-strip"></span></span>
+      <span class="wheel w3"><span class="digit-strip"></span></span>
+    </div>
+  </div>
+  <button id="who-back" class="back-btn" aria-label="Back">&lt;</button>
+
+  <!-- QR code library -->
+  <script defer src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+
+  <script>
+    // ---- Sanity checks (light tests) ----
+    console.assert(document.querySelector('header.topnav'), 'Topnav missing');
+
+    // sync nav height so nothing ever renders above it
+    (function syncNav(){
+      const nav = document.querySelector('header.topnav');
+      function apply(){ document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px'); }
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(apply); }
+      else setTimeout(apply, 50);
+      window.addEventListener('resize', apply);
+    })();
+
+    // open/close the in-page panels (who & knowme)
+    (function(){
+      const whoLink = document.querySelector('a[href="who-am-i.html"]');
+      const knowLink = document.querySelector('a[href="knowme.html"]');
+      const researchLink = document.querySelector('a[href="research.html"]');
+      const whoPanel = document.getElementById('panel-whoami');
+      const knowPanel = document.getElementById('panel-knowme');
+      const researchPanel = document.getElementById('panel-research');
+      const backGlobal = document.getElementById('who-back');
+
+      function openPanel(panel){
+        panel.classList.add('open');
+        document.body.classList.add('show-panel');
+        document.body.style.overflow='hidden';
+        if(panel===whoPanel){
+        document.body.classList.add('show-visual');
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{ if(window.__whoInit) window.__whoInit(); }));
+        } else {
+          document.body.classList.remove('show-visual');
+        }
+        if(panel===knowPanel){ document.body.classList.remove('show-visual'); renderKnowmeQR(); }
+      }
+      function closePanels(){
+        [whoPanel, knowPanel, researchPanel].forEach(p=>p.classList.remove('open'));
+        const onEnd = ()=>{ document.body.style.overflow=''; };
+        [whoPanel, knowPanel, researchPanel].forEach(p=> p.addEventListener('transitionend', onEnd, {once:true}));
+        document.body.classList.remove('show-panel'); document.body.classList.remove('show-visual');
+      }
+      if(whoLink) whoLink.addEventListener('click', e=>{ e.preventDefault(); openPanel(whoPanel); });
+      if(knowLink) knowLink.addEventListener('click', e=>{ e.preventDefault(); openPanel(knowPanel); });
+      if(researchLink) researchLink.addEventListener('click', e=>{ e.preventDefault(); openPanel(researchPanel); });
+      if(backGlobal) backGlobal.addEventListener('click', closePanels);
+    })();
+
+    // build mechanical odometer wheels (9..0 repeated 3x to allow wrap)
+    (function(){
+      const w0 = document.querySelector('#who-visual .w0 .digit-strip');
+      const w1 = document.querySelector('#who-visual .w1 .digit-strip');
+      const w2 = document.querySelector('#who-visual .w2 .digit-strip');
+      const w3 = document.querySelector('#who-visual .w3 .digit-strip');
+      function build(strip){ for(let k=0;k<3;k++){ for(let n=9;n>=0;n--){ const s=document.createElement('span'); s.textContent=String(n); strip.appendChild(s);} } }
+      [w0,w1,w2,w3].forEach(build);
+      console.assert(w0 && w1 && w2 && w3, 'Odometer strips not built');
+    })();
+
+    // scrollytelling: typewriter per year + odometer update
+    (function(){
+      const panel = document.getElementById('panel-whoami');
+      const sections = Array.from(panel.querySelectorAll('.year-section'));
+      const w0 = document.querySelector('#who-visual .w0 .digit-strip');
+      const w1 = document.querySelector('#who-visual .w1 .digit-strip');
+      const w2 = document.querySelector('#who-visual .w2 .digit-strip');
+      const w3 = document.querySelector('#who-visual .w3 .digit-strip');
+
+      let digitH = 0, observerStarted=false, io=null;
+      function measure(){
+        const odo = document.querySelector('#who-visual .odometer');
+        const fs = parseFloat(getComputedStyle(odo).fontSize)||24;
+        digitH = Math.max(1, Math.round(fs));
+      }
+      function pos(d){ return 9 - d; }
+      function setYear(y){
+        y = Math.max(0, Math.min(9999, Math.floor(y)));
+        const d1000 = Math.floor(y/1000)%10,
+              d100  = Math.floor(y/100)%10,
+              d10   = Math.floor(y/10)%10,
+              d1    = y%10;
+        const base = 10; // use the middle repetition of 9..0 sequence
+        const t0 = - (base + pos(d1000)) * digitH;
+        const t1 = - (base + pos(d100))  * digitH;
+        const t2 = - (base + pos(d10))   * digitH;
+        const t3 = - (base + pos(d1))    * digitH;
+        [w0,w1,w2,w3].forEach(w=>{ w.style.transition='transform 280ms ease'; });
+        w0.style.transform = `translateY(${t0}px)`;
+        w1.style.transform = `translateY(${t1}px)`;
+        w2.style.transform = `translateY(${t2}px)`;
+        w3.style.transform = `translateY(${t3}px)`;
+      }
+      function typeSection(sec){
+        if(sec.dataset.typed==='1') return; sec.dataset.typed='1';
+        const heads = Array.from(sec.querySelectorAll('.twh'));
+        let i=0;
+        function typeOne(el, txt, done){ let j=0; el.classList.add('typing'); el.textContent='';
+          (function tick(){ if(j<=txt.length){ el.textContent=txt.slice(0,j++); setTimeout(tick, 12+Math.random()*16); }
+            else { el.classList.remove('typing'); if(done) done(); } })(); }
+        (function next(){ if(i>=heads.length) return; const el=heads[i++]; typeOne(el, el.dataset.src||'', ()=>setTimeout(next, 40)); })();
+      }
+      function startObserver(){
+        if(observerStarted) return; observerStarted=true; measure();
+        // Start at 0000 on panel open
+        setYear(0);
+        io = new IntersectionObserver((entries)=>{
+          entries.forEach(en=>{
+            if(en.isIntersecting){
+              const yr=Number(en.target.dataset.year);
+              if(yr){ setYear(yr); typeSection(en.target); }
+            }
+          });
+        }, { root: panel, threshold: 0.45 });
+        sections.forEach(s=>io.observe(s));
+        // test: odometer has a transform string set
+        setTimeout(()=>console.assert(typeof w3.style.transform==='string', 'Odometer transform missing'), 200);
+      }
+      // Expose init to the opener IIFE
+      window.__whoInit = startObserver;
+    })();
+
+    // Knowme: build QR + vCard link
+    function buildVCard(){
+      const v = [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        'N:Ardehi;Borna;;;',
+        'FN:M.A. Borna Ardehi',
+        'ORG:Geschwister-Scholl-Institut für Politikwissenschaft;LMU Munich',
+        'EMAIL;TYPE=INTERNET:ardehi.borna@gsi.uni-muenchen.de',
+        'ADR;TYPE=WORK:;;Maria-Theresia-Straße 21;München;;81675;Germany',
+        'END:VCARD'
+      ].join('\n');
+      return v;
+    }
+    function renderKnowmeQR(){
+      try{
+        const vcard = buildVCard();
+        const canvas = document.getElementById('qrCanvas');
+        if(window.QRCode && canvas){
+          QRCode.toCanvas(canvas, vcard, {width:220, margin:1}, (err)=>{ if(err) console.error(err); });
+        }
+        const link = document.getElementById('vcard-download');
+        if(link){
+          const b64 = btoa(unescape(encodeURIComponent(vcard)));
+          link.href = 'data:text/vcard;base64,' + b64;
+          link.setAttribute('download','Borna_Ardehi.vcf');
+        }
+      }catch(e){ console.error('QR/vCard build failed', e); }
+    }
+
+    // ---- Tests for buildVCard (ensure newline + required fields) ----
+    (function vCardTests(){
+      const v = buildVCard();
+      console.assert(/^BEGIN:VCARD/m.test(v), 'vCard BEGIN missing');
+      console.assert(/\n/.test(v), 'vCard should contain LF newlines');
+      console.assert(!/\r\n/.test(v), 'vCard should not use CRLF');
+      console.assert(/ADR;TYPE=WORK:;;Maria-Theresia-Straße 21;München;;81675;Germany/.test(v), 'vCard ADR missing');
+    })();
+    
+    // Hook up "How do I research?" panel without touching existing handlers
+    (function(){
+      const howLink = document.querySelector('a[href="how-do-i-research.html"]');
+      const howPanel = document.getElementById('panel-how');
+      const back = document.getElementById('who-back');
+      if(howLink && howPanel){
+        howLink.addEventListener('click', function(e){
+          e.preventDefault();
+          howPanel.classList.add('open');
+          document.body.classList.add('show-panel');
+          document.body.classList.remove('show-visual');
+          document.body.style.overflow='hidden';
+        });
+      }
+      if(back && howPanel){
+        back.addEventListener('click', function(){ howPanel.classList.remove('open'); });
+      }
+    })();
+
+    // Research: mark Link tags as clicked to change colour
+    (function(){
+      document.querySelectorAll('#panel-research .tag.orange').forEach(el=>{
+        el.addEventListener('click', ()=> el.classList.add('clicked'));
+      });
+    })();
+      // Heptad scrollytelling
+    (function(){
+      const panel = document.getElementById('panel-how');
+      if(!panel) return;
+      const steps = Array.from(panel.querySelectorAll('.hep-sec'));
+      const layers = Array.from(panel.querySelectorAll('.heptad-visual .h-layer'));
+      const container = panel.querySelector('.heptad-visual');
+      const deg = 360/7;
+      function preset(){
+        layers.forEach((el,i)=>{
+          el.style.opacity = 0;
+          el.style.transform = `rotate(${i*deg}deg)`;
+        });
+        if(container) container.style.transform = 'rotate(0deg)';
+      }
+      function show(k){
+        layers.forEach((el,i)=>{ el.style.opacity = i < k ? 1 : 0; });
+        if(container) container.style.transform = `rotate(${(k-1)*deg}deg)`;
+      }
+      let io=null, started=false;
+      function start(){
+        if(started) return; started=true; preset(); show(1);
+        io = new IntersectionObserver((ents)=>{
+          ents.forEach(en=>{
+            if(en.isIntersecting){ const step = Number(en.target.dataset.step)||1; show(step); }
+          });
+        }, { root: panel, threshold:.45 });
+        steps.forEach(s=>io.observe(s));
+      }
+      const howLink = document.querySelector('a[href="how-do-i-research.html"]');
+      if(howLink){ howLink.addEventListener('click', ()=> setTimeout(start, 300)); }
+    })();
+  </script>
+</body>
+</html>
