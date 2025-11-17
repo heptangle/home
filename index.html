@@ -149,25 +149,36 @@
     .card-right .small{font-size:.9rem;margin-top:.6rem}
     .vcard-actions{margin-top:1rem;font-size:.95rem}
     .vcard-actions .link{color:var(--fg);text-decoration:underline}
+@media (max-width: 900px){ .visual-pane{width:48vw} }
+@media (max-width: 700px){ .visual-pane{position:static;width:auto;margin-top:2rem;pointer-events:auto} }
+.how-container{max-width:1300px;margin:0 auto}
+.how-container h1{font-size:clamp(2.6rem,6vw,4rem);font-weight:400;margin:0 0 1rem}
 
-    @media (max-width: 900px){ .visual-pane{width:48vw} }
-    @media (max-width: 700px){ .visual-pane{position:static;width:auto;margin-top:2rem;pointer-events:auto} }
-    .how-container{max-width:1300px;margin:0 auto}
-    .how-container h1{font-size:clamp(2.6rem,6vw,4rem);font-weight:400;margin:0 0 1rem}
-    .how-intro{max-width:70ch;margin:0 0 1.25rem;font-size:1.1rem;line-height:1.7}
-    .res-intro{max-width:70ch;margin:0 0 1.25rem;font-size:1.1rem;line-height:1.7}
-    .illus-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.2rem;margin-top:1.2rem}
-    .illus-card{position:relative;background:#fff;border:2px solid var(--border);border-radius:16px;padding:1.25rem;min-height:420px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-    .illus-card img,.illus-card svg{max-width:100%;height:auto;display:block;transition:opacity .28s ease}
-    .illus-card:hover img,.illus-card:hover svg{opacity:1} 
-    .illus-card .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:1.4rem;opacity:0;z-index:2;background:rgba(0,0,0,0);transition:opacity .28s ease, background .28s ease, color .18s ease}
-    .illus-card .overlay p{color:#fff;font-size:1.05rem;line-height:1.6;max-width:55ch;margin:0}
-    .illus-card.forecast-card:hover{background:#2A623D}
-    .illus-card.foresight-card:hover{background:#AF1732}
-    .illus-card:hover .overlay{opacity:0} 
-    .illus-caption{display:flex;justify-content:center;margin-top:.8rem}
-    .pill{border:1.8px solid var(--border);border-radius:12px;padding:.35rem .85rem;font-size:1.05rem}
-    @media (max-width: 980px){ .illus-grid{grid-template-columns:1fr} .illus-card{min-height:360px} }
+/* tightened, responsive body copy */
+.how-intro{max-width:72ch;margin:0 0 1.25rem;font-size:clamp(1rem,0.96rem + 0.2vw,1.15rem);line-height:1.65}
+.res-intro{max-width:72ch;margin:0 0 1.25rem;font-size:clamp(1rem,0.96rem + 0.2vw,1.15rem);line-height:1.65}
+
+/* optional list inside the intro */
+.how-list{max-width:72ch;margin:.4rem 0 1.2rem;padding-left:1.2rem;font-size:clamp(.98rem,.94rem + 0.2vw,1.12rem);line-height:1.6}
+.how-list li{margin:.25rem 0}
+
+/* 3-up grid with Providence centered by markup order */
+.illus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2.2rem;margin-top:1.2rem}
+.illus-card{position:relative;background:#fff;border:2px solid var(--border);border-radius:16px;padding:1.25rem;min-height:420px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.illus-card img,.illus-card svg{max-width:100%;height:auto;display:block;transition:opacity .28s ease}
+.illus-card:hover img,.illus-card:hover svg{opacity:1}
+.illus-card .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:1.4rem;opacity:0;z-index:2;background:rgba(0,0,0,0);transition:opacity .28s ease, background .28s ease, color .18s ease}
+.illus-card .overlay p{color:#fff;font-size:1.05rem;line-height:1.6;max-width:55ch;margin:0}
+.illus-card.forecast-card:hover{background:#2A623D}
+.illus-card.foresight-card:hover{background:#AF1732}
+.illus-card:hover .overlay{opacity:0}
+.illus-caption{display:flex;justify-content:center;margin-top:.8rem}
+.pill{border:1.8px solid var(--border);border-radius:12px;padding:.35rem .85rem;font-size:1.05rem}
+
+/* collapse to 2 cols then 1 col */
+@media (max-width:1100px){ .illus-grid{grid-template-columns:1fr 1fr} }
+@media (max-width: 980px){ .illus-grid{grid-template-columns:1fr} .illus-card{min-height:360px} }
+
 
     /* research panel */
     .research-container{max-width:1200px;margin:0 auto}
@@ -350,35 +361,48 @@
   </section>
 
   <!-- HOW DO I RESEARCH overlay -->
-  <section id="panel-how" class="panel" aria-hidden="true">
-    <div class="how-container">
-      <h1>What is Heptangle?</h1>
-      <p class="how-intro">Heptangle is a heuristics system for producing anticipatory knowledge and providence on political futures through an applied combination of Foresight and Forecast. Foresight prefiguration inserts partial observers and axioms into a field so that calculation can run ahead of appearance, while forecast empiricism equips inquiry with atlases and rule-sets that standardise measurement and coerce phenomena into calculable form. 
-Providential knowledge arises from architecturing a preferred outcome within the field of potential futures and its five internal gradations:
-         <ul>
-  <li>Potentiality encompasses everything beyond the present time</li>
-  <li>Possibilities are future knowledge of "might happens", a set of states that can be conceived but are not yet grounded in evidence.</li>
-  <li>Plausiblities are current knowledge of "could happen", derived from causal reasoning and consistent with known mechanisms.</li>
-  <li>Probable is the current trends of "likely to happen", where;</li>
-  <li>Projections are the "most probable" to happen.</li>
-</ul> 
-      The preferred outcome occupies the liminal zone between the plausible, the probable, and the projected. Providence, in this framework, is the delineation of the pathway leading from the field of potentialities toward that preferable configuration. It is operationalised through the heptad method described below, which transforms open potential into structured vidence and, ultimately, directed action.</p>
-      <div class="illus-grid">
-        <div class="illus">
-          <div class="illus-card" aria-label="forecast illustration">
-            <img src="Forecast.svg" alt="forecast diagram" loading="lazy"/>
-          </div>
-          <div class="illus-caption"><span class="pill">forecast</span></div>
-        </div>
-        <div class="illus">
-          <div class="illus-card" aria-label="foresight illustration">
-            <img src="Foresight.svg" alt="foresight diagram" loading="lazy"/>
-          </div>
-          <div class="illus-caption"><span class="pill">foresight</span></div>
-        </div>
-      </div>
 
-      <div class="atlas-divider"><span>Atlas of Providence</span></div>
+<section id="panel-how" class="panel" aria-hidden="true">
+  <div class="how-container">
+    <h1>What is Heptangle?</h1>
+
+    <p class="how-intro">
+      Heptangle is a heuristics system for producing anticipatory knowledge and providence on political futures through an applied combination of Foresight and Forecast. Foresight prefiguration inserts partial observers and axioms into a field so that calculation can run ahead of appearance, while forecast empiricism equips inquiry with atlases and rule-sets that standardise measurement and coerce phenomena into calculable form.
+    </p>
+    <p class="how-intro">
+      Providential knowledge arises from architecturing a preferred outcome within the field of potential futures and its five internal gradations:
+    </p>
+    <ul class="how-list">
+      <li>Potentiality encompasses everything beyond the present time</li>
+      <li>Possibilities are future knowledge of “might happens”, a set of states that can be conceived but are not yet grounded in evidence.</li>
+      <li>Plausibilities are current knowledge of “could happen”, derived from causal reasoning and consistent with known mechanisms.</li>
+      <li>Probable is the current trends of “likely to happen”, where;</li>
+      <li>Projections are the “most probable” to happen.</li>
+    </ul>
+
+    <p class="how-intro">
+      The preferred outcome occupies the liminal zone between the plausible, the probable, and the projected. Providence, in this framework, is the delineation of the pathway leading from the field of potentialities toward that preferable configuration. It is operationalised through the heptad method described below, which transforms open potential into structured evidence and, ultimately, directed action.
+    </p>
+ <div class="illus-grid">
+      <div class="illus">
+        <div class="illus-card" aria-label="forecast illustration">
+          <img src="Forecast.svg" alt="forecast diagram" loading="lazy">
+        </div>
+        <div class="illus-caption"><span class="pill">forecast</span></div>
+      </div>
+      <div class="illus">
+        <div class="illus-card" aria-label="providence illustration">
+          <img src="providence.svg" alt="providence diagram" loading="lazy">
+        </div>
+        <div class="illus-caption"><span class="pill">providence</span></div>
+      </div>
+      <div class="illus">
+        <div class="illus-card" aria-label="foresight illustration">
+          <img src="Foresight.svg" alt="foresight diagram" loading="lazy">
+        </div>
+        <div class="illus-caption"><span class="pill">foresight</span></div>
+      </div>
+    </div>      <div class="atlas-divider"><span>Atlas of Providence</span></div>
 
       <div class="heptad-wrap">
         <div class="heptad-left">
